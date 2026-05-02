@@ -1,21 +1,25 @@
 import { Link, useLocation } from 'react-router-dom';
 import Icon from '@/components/ui/Icon';
-import { useAuth } from '@/hooks/useAuth';
-import { useAlerts } from '@/hooks/useAlerts';
 import { ROLE_NAV, ROLE_LABELS } from '@/constants/roles';
 
 const NAV_ITEMS = [
-  { id: 'dashboard',   path: '/',            icon: 'dashboard',   label: 'Dashboard'    },
-  { id: 'history',     path: '/history',     icon: 'history',     label: 'Historial'    },
-  { id: 'coordinator', path: '/coordinator', icon: 'coordinator', label: 'Coordinador'  },
+  { id: 'dashboard',   path: '/',            icon: 'dashboard',   label: 'Dashboard'      },
+  { id: 'history',     path: '/history',     icon: 'history',     label: 'Historial'      },
+  { id: 'coordinator', path: '/coordinator', icon: 'coordinator', label: 'Coordinador'    },
   { id: 'admin',       path: '/admin',       icon: 'settings',    label: 'Administración' },
 ];
 
-export default function Sidebar() {
-  const { user, logout }       = useAuth();
-  const { classrooms, pendingCount, hasCritical } = useAlerts();
-  const location               = useLocation();
-
+/**
+ * Barra lateral de navegación — puramente presentacional.
+ * Props:
+ *   user         — { name, role } usuario autenticado
+ *   classrooms   — lista de aulas con status y alertCount
+ *   pendingCount — número de alertas pendientes (badge en Dashboard)
+ *   hasCritical  — resalta el borde cuando hay AGRESIÓN pendiente
+ *   onLogout     — cb() cerrar sesión
+ */
+export default function Sidebar({ user, classrooms = [], pendingCount = 0, hasCritical = false, onLogout }) {
+  const location    = useLocation();
   const allowedViews = ROLE_NAV[user?.role] ?? ['dashboard'];
   const visibleNav   = NAV_ITEMS.filter((n) => allowedViews.includes(n.id));
 
@@ -62,10 +66,7 @@ export default function Sidebar() {
         <div className="text-[10px] text-text-hint tracking-widest font-semibold mb-1.5 px-1">AULAS</div>
         <div className="flex flex-col gap-0.5">
           {classrooms.map((c) => (
-            <div
-              key={c.id}
-              className="flex items-center gap-2 px-2 py-1.5 rounded-md text-xs hover:bg-white/5 cursor-pointer transition-colors"
-            >
+            <div key={c.id} className="flex items-center gap-2 px-2 py-1.5 rounded-md text-xs hover:bg-white/5 transition-colors">
               <span
                 className="w-2 h-2 rounded-full shrink-0"
                 style={{
@@ -115,7 +116,7 @@ export default function Sidebar() {
       {/* Logout */}
       <div className="p-3 border-t border-[#1e2d4a]">
         <button
-          onClick={logout}
+          onClick={onLogout}
           className="w-full flex items-center gap-2 px-2.5 py-2 rounded-md text-[13px] text-text-hint hover:text-red-400 hover:bg-red-500/5 transition-colors"
         >
           <Icon name="logout" size={14} />

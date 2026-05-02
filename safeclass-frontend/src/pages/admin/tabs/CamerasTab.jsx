@@ -1,16 +1,15 @@
 import { useState } from 'react';
 import Icon from '@/components/ui/Icon';
-import { CAM_STATUS } from '@/constants/camStatus';
-import { fmt } from '@/utils/formatters';
+import { CameraRow } from '@/components/admin';
 import { mockCameras } from '@/data/mockData';
 import { useToast } from '@/hooks/useToast';
 
 export default function CamerasTab() {
-  const { addToast }      = useToast();
+  const { addToast }          = useToast();
   const [cameras, setCameras] = useState(mockCameras);
   const [testing, setTesting] = useState(null);
 
-  const testCamera = (id) => {
+  const handleTest = (id) => {
     setTesting(id);
     setTimeout(() => {
       const ok = Math.random() > 0.35;
@@ -28,41 +27,15 @@ export default function CamerasTab() {
           <Icon name="plus" size={13} /> Agregar cámara
         </button>
       </div>
-
       <div className="flex flex-col gap-2">
-        {cameras.map((c) => {
-          const cfg = CAM_STATUS[c.status] ?? CAM_STATUS.offline;
-          return (
-            <div key={c.id} className="flex items-center gap-3 px-4 py-3 bg-surface-card border border-[#1e2d4a] rounded-lg">
-              <span
-                className="w-2.5 h-2.5 rounded-full shrink-0"
-                style={{
-                  background: cfg.color,
-                  boxShadow: cfg.pulse ? `0 0 6px ${cfg.color}` : 'none',
-                }}
-              />
-              <div className="flex-1 min-w-0">
-                <div className="text-sm font-medium text-text-primary">{c.name}</div>
-                <div className="text-xs text-text-hint font-mono truncate">{c.rtsp}</div>
-              </div>
-              <div className="text-right hidden sm:block">
-                <div className="text-xs text-text-secondary">{c.fps > 0 ? `${c.fps} fps` : '—'} · {c.resolution}</div>
-                <div className="text-[10px] text-text-hint">{fmt.datetime(c.lastCheck)}</div>
-              </div>
-              <button
-                onClick={() => testCamera(c.id)}
-                disabled={!!testing}
-                className="flex items-center gap-1.5 px-2.5 py-1 text-xs text-text-secondary border border-[#1e2d4a] rounded hover:border-blue-500 hover:text-blue-400 transition-colors disabled:opacity-50"
-              >
-                {testing === c.id
-                  ? <span className="w-3 h-3 border border-blue-400 border-t-transparent rounded-full animate-spin-slow" />
-                  : <Icon name="wifi" size={12} />
-                }
-                Test
-              </button>
-            </div>
-          );
-        })}
+        {cameras.map((c) => (
+          <CameraRow
+            key={c.id}
+            camera={c}
+            isTesting={testing === c.id}
+            onTest={handleTest}
+          />
+        ))}
       </div>
     </div>
   );

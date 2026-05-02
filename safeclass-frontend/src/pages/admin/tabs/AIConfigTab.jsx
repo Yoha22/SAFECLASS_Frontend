@@ -1,11 +1,12 @@
 import { useState } from 'react';
 import Icon from '@/components/ui/Icon';
+import { ThresholdSlider } from '@/components/admin';
 import { fmt } from '@/utils/formatters';
 import { mockSystemStats } from '@/data/mockData';
 import { useToast } from '@/hooks/useToast';
 
 export default function AIConfigTab() {
-  const { addToast } = useToast();
+  const { addToast }  = useToast();
   const [threshold,        setThreshold]        = useState(mockSystemStats.threshold);
   const [thresholdHistory, setThresholdHistory] = useState(mockSystemStats.thresholdHistory);
   const [confirmOpen,      setConfirmOpen]       = useState(false);
@@ -26,27 +27,11 @@ export default function AIConfigTab() {
         Las alertas con confianza inferior al umbral no se notifican al docente. Rango recomendado: 0.65 – 0.90.
       </p>
 
-      {/* Slider */}
-      <div className="bg-surface-card border border-[#1e2d4a] rounded-lg p-5 mb-4">
-        <div className="flex items-center justify-between mb-3">
-          <span className="text-xs text-text-secondary">Umbral actual</span>
-          <span className="font-mono text-xl font-bold text-blue-400">{threshold.toFixed(2)}</span>
-        </div>
-        <input
-          type="range" min="0.50" max="0.95" step="0.01"
-          value={threshold}
-          onChange={(e) => setThreshold(parseFloat(e.target.value))}
-          className="w-full accent-blue-500"
-        />
-        <div className="flex justify-between text-[10px] text-text-hint mt-1">
-          <span>0.50 (más alertas)</span>
-          <span>0.95 (más preciso)</span>
-        </div>
-      </div>
+      <ThresholdSlider value={threshold} onChange={setThreshold} />
 
       <button
         onClick={() => setConfirmOpen(true)}
-        className="flex items-center gap-2 px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white text-sm font-semibold rounded-md transition-colors"
+        className="mt-4 flex items-center gap-2 px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white text-sm font-semibold rounded-md transition-colors"
       >
         <Icon name="check" size={14} /> Aplicar umbral
       </button>
@@ -64,7 +49,6 @@ export default function AIConfigTab() {
         </div>
       )}
 
-      {/* History */}
       <div className="mt-6">
         <h4 className="text-xs font-semibold text-text-secondary mb-2">Historial de cambios</h4>
         <div className="flex flex-col gap-1.5">

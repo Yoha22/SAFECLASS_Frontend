@@ -2,11 +2,17 @@ import { AlertTypeBadge, StatusBadge } from '@/components/ui/Badge';
 import ConfidenceBar from '@/components/ui/ConfidenceBar';
 import Icon from '@/components/ui/Icon';
 import { fmt } from '@/utils/formatters';
-import { ALERT_STATUS, DISCARD_REASONS } from '@/constants/alertConfig';
-import { useAlerts } from '@/hooks/useAlerts';
+import { ALERT_STATUS } from '@/constants/alertConfig';
 
-export default function AlertCard({ alert, onClick }) {
-  const { confirmAlert, discardAlert, escalateAlert } = useAlerts();
+/**
+ * Tarjeta de alerta — puramente presentacional.
+ * Props:
+ *   alert      — objeto de alerta
+ *   onClick    — cb(alert) al hacer clic en la tarjeta
+ *   onConfirm  — cb(alertId) botón Confirmar
+ *   onDiscard  — cb(alertId) botón Descartar (usa razón por defecto)
+ */
+export default function AlertCard({ alert, onClick, onConfirm, onDiscard }) {
   const isPending = alert.status === ALERT_STATUS.PENDIENTE;
 
   return (
@@ -37,23 +43,24 @@ export default function AlertCard({ alert, onClick }) {
         </div>
       )}
 
-      {isPending && (
-        <div
-          className="flex gap-2 mt-3"
-          onClick={(e) => e.stopPropagation()}
-        >
-          <button
-            onClick={() => confirmAlert(alert.id)}
-            className="flex-1 flex items-center justify-center gap-1 py-1 rounded text-[12px] font-semibold text-green-400 bg-green-500/10 hover:bg-green-500/20 transition-colors"
-          >
-            <Icon name="check" size={13} /> Confirmar
-          </button>
-          <button
-            onClick={() => discardAlert(alert.id, DISCARD_REASONS[0])}
-            className="flex-1 flex items-center justify-center gap-1 py-1 rounded text-[12px] font-semibold text-text-hint bg-white/5 hover:bg-white/10 transition-colors"
-          >
-            <Icon name="x" size={13} /> Descartar
-          </button>
+      {isPending && (onConfirm || onDiscard) && (
+        <div className="flex gap-2 mt-3" onClick={(e) => e.stopPropagation()}>
+          {onConfirm && (
+            <button
+              onClick={() => onConfirm(alert.id)}
+              className="flex-1 flex items-center justify-center gap-1 py-1 rounded text-[12px] font-semibold text-green-400 bg-green-500/10 hover:bg-green-500/20 transition-colors"
+            >
+              <Icon name="check" size={13} /> Confirmar
+            </button>
+          )}
+          {onDiscard && (
+            <button
+              onClick={() => onDiscard(alert.id)}
+              className="flex-1 flex items-center justify-center gap-1 py-1 rounded text-[12px] font-semibold text-text-hint bg-white/5 hover:bg-white/10 transition-colors"
+            >
+              <Icon name="x" size={13} /> Descartar
+            </button>
+          )}
         </div>
       )}
     </div>
