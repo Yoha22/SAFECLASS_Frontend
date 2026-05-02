@@ -158,7 +158,11 @@ export default function LoginPage() {
           )}
 
           <div className="text-right -mt-2">
-            <button type="button" className="text-xs text-blue-400 hover:text-blue-300 transition-colors bg-transparent border-none cursor-pointer p-0">
+            <button
+              type="button"
+              onClick={() => navigate('/forgot-password')}
+              className="text-xs text-blue-400 hover:text-blue-300 transition-colors bg-transparent border-none cursor-pointer p-0"
+            >
               Olvidé mi contraseña
             </button>
           </div>
