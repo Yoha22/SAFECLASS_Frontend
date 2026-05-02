@@ -1,0 +1,39 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  *, *::before, *::after {
+    box-sizing: border-box;
+  }
+
+  html, body, #root {
+    height: 100%;
+    margin: 0;
+  }
+
+  body {
+    @apply bg-surface text-text-primary font-sans antialiased;
+  }
+
+  ::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+  ::-webkit-scrollbar-track {
+    @apply bg-surface;
+  }
+  ::-webkit-scrollbar-thumb {
+    @apply bg-border rounded-full;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    @apply bg-border-focus;
+  }
+}
+
+@layer utilities {
+  .skeleton-gradient {
+    background: linear-gradient(90deg, #1e2d4a 25%, #253552 50%, #1e2d4a 75%);
+    background-size: 200% 100%;
+  }
+}
