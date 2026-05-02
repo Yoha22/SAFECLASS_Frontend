@@ -28,8 +28,21 @@ export function AuthProvider({ children }) {
 
   const logout = useCallback(() => setUser(null), []);
 
+  // HU-02: Solicitud de recuperación de contraseña
+  const requestPasswordReset = useCallback((email) => {
+    return new Promise((resolve, reject) => {
+      setTimeout(() => {
+        if (email.endsWith('@iecol.edu.co')) {
+          resolve({ email });
+        } else {
+          reject(new Error('El correo no pertenece al dominio institucional'));
+        }
+      }, 900);
+    });
+  }, []);
+
   return (
-    <AuthContext.Provider value={{ user, login, logout }}>
+    <AuthContext.Provider value={{ user, login, logout, requestPasswordReset }}>
       {children}
     </AuthContext.Provider>
   );

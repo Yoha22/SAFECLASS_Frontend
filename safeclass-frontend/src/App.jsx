@@ -5,6 +5,7 @@ import { ToastProvider } from '@/context/ToastContext';
 import { AlertProvider } from '@/context/AlertContext';
 import AppShell from '@/components/layout/AppShell';
 import LoginPage from '@/pages/auth/LoginPage';
+import ForgotPasswordPage from '@/pages/auth/ForgotPasswordPage';
 
 // Route guard: redirects to /login if unauthenticated
 const ProtectedRoute = ({ children }) => {
@@ -20,6 +21,10 @@ const AppRoutes = () => {
       <Route
         path="/login"
         element={user ? <Navigate to="/" replace /> : <LoginPage />}
+      />
+      <Route
+        path="/forgot-password"
+        element={user ? <Navigate to="/" replace /> : <ForgotPasswordPage />}
       />
       <Route
         path="/*"
