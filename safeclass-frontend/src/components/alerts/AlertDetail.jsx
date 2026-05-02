@@ -6,16 +6,23 @@ import ConfidenceBar from '@/components/ui/ConfidenceBar';
 import VideoPlaceholder from '@/components/ui/VideoPlaceholder';
 import { fmt } from '@/utils/formatters';
 import { ALERT_STATUS, DISCARD_REASONS } from '@/constants/alertConfig';
-import { useAlerts } from '@/hooks/useAlerts';
 
-export default function AlertDetail({ alert, onClose }) {
-  const { confirmAlert, discardAlert, escalateAlert } = useAlerts();
+/**
+ * Modal de detalle de alerta — puramente presentacional.
+ * Props:
+ *   alert       — objeto de alerta
+ *   onClose     — cb() cerrar modal
+ *   onConfirm   — cb(alertId) confirmar incidente
+ *   onDiscard   — cb(alertId, reason) descartar con razón
+ *   onEscalate  — cb(alertId) escalar a coordinador
+ */
+export default function AlertDetail({ alert, onClose, onConfirm, onDiscard, onEscalate }) {
   const [discardReason, setDiscardReason] = useState(DISCARD_REASONS[0]);
-  const isPending  = alert.status === ALERT_STATUS.PENDIENTE;
+  const isPending = alert.status === ALERT_STATUS.PENDIENTE;
 
-  const handleConfirm = () => { confirmAlert(alert.id);               onClose(); };
-  const handleDiscard = () => { discardAlert(alert.id, discardReason); onClose(); };
-  const handleEscalate = () => escalateAlert(alert.id);
+  const handleConfirm  = () => { onConfirm?.(alert.id);                  onClose(); };
+  const handleDiscard  = () => { onDiscard?.(alert.id, discardReason);   onClose(); };
+  const handleEscalate = () => onEscalate?.(alert.id);
 
   return (
     <Modal open onClose={onClose}>
@@ -32,19 +39,17 @@ export default function AlertDetail({ alert, onClose }) {
 
       {/* Body */}
       <div className="px-5 py-4 flex flex-col gap-4">
-        {/* Video */}
         <VideoPlaceholder
           classroom={alert.classroom}
-          hasAlert={alert.status === ALERT_STATUS.PENDIENTE}
+          hasAlert={isPending}
         />
 
-        {/* Meta */}
         <div className="grid grid-cols-2 gap-2 text-xs">
           {[
-            { label: 'Estado',    value: <StatusBadge status={alert.status} /> },
-            { label: 'Cámara',   value: alert.cameraId },
-            { label: 'Aula',     value: `Aula ${alert.classroom}` },
-            { label: 'Hora',     value: <span className="font-mono">{fmt.datetime(alert.timestamp)}</span> },
+            { label: 'Estado',  value: <StatusBadge status={alert.status} /> },
+            { label: 'Cámara',  value: alert.cameraId },
+            { label: 'Aula',    value: `Aula ${alert.classroom}` },
+            { label: 'Hora',    value: <span className="font-mono">{fmt.datetime(alert.timestamp)}</span> },
           ].map(({ label, value }) => (
             <div key={label} className="bg-[#0b0f1a] border border-[#1e2d4a] rounded-md p-2.5">
               <div className="text-text-hint mb-1">{label}</div>
@@ -53,14 +58,12 @@ export default function AlertDetail({ alert, onClose }) {
           ))}
         </div>
 
-        {/* Confidence */}
         <div className="bg-[#0b0f1a] border border-[#1e2d4a] rounded-md p-3">
           <div className="text-xs text-text-hint mb-2">Confianza del modelo IA</div>
           <ConfidenceBar value={alert.confidence} />
         </div>
 
-        {/* Discard reason selector */}
-        {isPending && (
+        {isPending && onDiscard && (
           <div>
             <label className="text-xs text-text-hint block mb-1.5">Razón de descarte</label>
             <select
@@ -75,7 +78,6 @@ export default function AlertDetail({ alert, onClose }) {
           </div>
         )}
 
-        {/* Actions timeline */}
         {alert.actions?.length > 0 && (
           <div>
             <div className="text-xs text-text-hint mb-2">Historial de acciones</div>
@@ -95,21 +97,26 @@ export default function AlertDetail({ alert, onClose }) {
       {/* Footer actions */}
       {isPending && (
         <div className="px-5 py-4 border-t border-[#1e2d4a] flex gap-2">
-          <button
-            onClick={handleConfirm}
-            className="flex-1 flex items-center justify-center gap-1.5 py-2 rounded-md text-sm font-semibold text-white bg-green-500 hover:bg-green-600 transition-colors"
-          >
-            <Icon name="check" size={14} /> Confirmar incidente
-          </button>
-          <button
-            onClick={handleDiscard}
-            className="flex-1 flex items-center justify-center gap-1.5 py-2 rounded-md text-sm font-semibold text-text-secondary bg-white/5 hover:bg-white/10 transition-colors"
-          >
-            <Icon name="x" size={14} /> Descartar
-          </button>
-          {!alert.escalated && (
+          {onConfirm && (
+            <button
+              onClick={handleConfirm}
+              className="flex-1 flex items-center justify-center gap-1.5 py-2 rounded-md text-sm font-semibold text-white bg-green-500 hover:bg-green-600 transition-colors"
+            >
+              <Icon name="check" size={14} /> Confirmar incidente
+            </button>
+          )}
+          {onDiscard && (
+            <button
+              onClick={handleDiscard}
+              className="flex-1 flex items-center justify-center gap-1.5 py-2 rounded-md text-sm font-semibold text-text-secondary bg-white/5 hover:bg-white/10 transition-colors"
+            >
+              <Icon name="x" size={14} /> Descartar
+            </button>
+          )}
+          {onEscalate && !alert.escalated && (
             <button
               onClick={handleEscalate}
+              title="Escalar a coordinador"
               className="flex items-center justify-center gap-1.5 px-3 py-2 rounded-md text-sm font-semibold text-yellow-400 bg-yellow-500/10 hover:bg-yellow-500/20 transition-colors"
             >
               <Icon name="escalate" size={14} />
