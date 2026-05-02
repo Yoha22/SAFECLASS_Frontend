@@ -1,0 +1,82 @@
+import { useState } from 'react';
+import Icon from '@/components/ui/Icon';
+import { fmt } from '@/utils/formatters';
+import { mockSystemStats } from '@/data/mockData';
+import { useToast } from '@/hooks/useToast';
+
+export default function AIConfigTab() {
+  const { addToast } = useToast();
+  const [threshold,        setThreshold]        = useState(mockSystemStats.threshold);
+  const [thresholdHistory, setThresholdHistory] = useState(mockSystemStats.thresholdHistory);
+  const [confirmOpen,      setConfirmOpen]       = useState(false);
+
+  const apply = () => {
+    setThresholdHistory((prev) => [
+      ...prev.slice(-4),
+      { value: threshold, user: 'Admin', timestamp: new Date().toISOString() },
+    ]);
+    setConfirmOpen(false);
+    addToast(`Umbral actualizado a ${threshold.toFixed(2)}`, 'success');
+  };
+
+  return (
+    <div className="p-6 max-w-lg">
+      <h3 className="text-sm font-semibold text-text-primary mb-1">Umbral de confianza del modelo IA</h3>
+      <p className="text-xs text-text-hint mb-5">
+        Las alertas con confianza inferior al umbral no se notifican al docente. Rango recomendado: 0.65 – 0.90.
+      </p>
+
+      {/* Slider */}
+      <div className="bg-surface-card border border-[#1e2d4a] rounded-lg p-5 mb-4">
+        <div className="flex items-center justify-between mb-3">
+          <span className="text-xs text-text-secondary">Umbral actual</span>
+          <span className="font-mono text-xl font-bold text-blue-400">{threshold.toFixed(2)}</span>
+        </div>
+        <input
+          type="range" min="0.50" max="0.95" step="0.01"
+          value={threshold}
+          onChange={(e) => setThreshold(parseFloat(e.target.value))}
+          className="w-full accent-blue-500"
+        />
+        <div className="flex justify-between text-[10px] text-text-hint mt-1">
+          <span>0.50 (más alertas)</span>
+          <span>0.95 (más preciso)</span>
+        </div>
+      </div>
+
+      <button
+        onClick={() => setConfirmOpen(true)}
+        className="flex items-center gap-2 px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white text-sm font-semibold rounded-md transition-colors"
+      >
+        <Icon name="check" size={14} /> Aplicar umbral
+      </button>
+
+      {confirmOpen && (
+        <div className="mt-4 p-4 bg-yellow-500/5 border border-yellow-500/30 rounded-lg">
+          <p className="text-sm text-yellow-400 mb-3">
+            ¿Confirmar nuevo umbral de <strong className="font-mono">{threshold.toFixed(2)}</strong>?
+            Tendrá efecto inmediato en el módulo IA.
+          </p>
+          <div className="flex gap-2">
+            <button onClick={apply} className="px-3 py-1.5 bg-yellow-500 hover:bg-yellow-600 text-black text-xs font-bold rounded transition-colors">Confirmar</button>
+            <button onClick={() => setConfirmOpen(false)} className="px-3 py-1.5 bg-white/5 hover:bg-white/10 text-text-secondary text-xs rounded transition-colors">Cancelar</button>
+          </div>
+        </div>
+      )}
+
+      {/* History */}
+      <div className="mt-6">
+        <h4 className="text-xs font-semibold text-text-secondary mb-2">Historial de cambios</h4>
+        <div className="flex flex-col gap-1.5">
+          {[...thresholdHistory].reverse().map((h, i) => (
+            <div key={i} className="flex items-center justify-between text-xs text-text-secondary bg-surface-card border border-[#1e2d4a] rounded px-3 py-2">
+              <span className="font-mono text-blue-400">{h.value.toFixed(2)}</span>
+              <span className="text-text-hint">{h.user}</span>
+              <span className="font-mono text-text-hint">{fmt.datetime(h.timestamp)}</span>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
