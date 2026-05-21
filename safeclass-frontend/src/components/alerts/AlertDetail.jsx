@@ -47,9 +47,9 @@ export default function AlertDetail({ alert, onClose, onConfirm, onDiscard, onEs
         <div className="grid grid-cols-2 gap-2 text-xs">
           {[
             { label: 'Estado',  value: <StatusBadge status={alert.status} /> },
-            { label: 'Cámara',  value: alert.cameraId },
-            { label: 'Aula',    value: `Aula ${alert.classroom}` },
-            { label: 'Hora',    value: <span className="font-mono">{fmt.datetime(alert.timestamp)}</span> },
+            { label: 'Cámara',  value: alert.camera?.name ?? alert.cameraId },
+            { label: 'Aula',    value: alert.classroom?.name ?? `Aula ${alert.classroom}` },
+            { label: 'Hora',    value: <span className="font-mono">{fmt.datetime(alert.createdAt ?? alert.timestamp)}</span> },
           ].map(({ label, value }) => (
             <div key={label} className="bg-[#0b0f1a] border border-[#1e2d4a] rounded-md p-2.5">
               <div className="text-text-hint mb-1">{label}</div>
@@ -85,8 +85,8 @@ export default function AlertDetail({ alert, onClose, onConfirm, onDiscard, onEs
               {alert.actions.map((a, i) => (
                 <div key={i} className="flex items-start gap-2 text-xs text-text-secondary">
                   <Icon name="check" size={12} className="mt-0.5 text-green-400 shrink-0" />
-                  <span>{a.action} — <span className="text-text-hint">{a.user}</span></span>
-                  <span className="ml-auto font-mono text-text-hint">{fmt.time(a.timestamp)}</span>
+                  <span>{a.action} — <span className="text-text-hint">{a.user?.name ?? a.user}</span></span>
+                  <span className="ml-auto font-mono text-text-hint">{fmt.time(a.createdAt ?? a.timestamp)}</span>
                 </div>
               ))}
             </div>

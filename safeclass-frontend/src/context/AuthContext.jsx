@@ -1,43 +1,50 @@
-import React, { createContext, useContext, useState, useCallback } from 'react';
-import { mockUsers } from '@/data/mockData';
-import { getRoleFromEmail } from '@/constants/roles';
+import React, { createContext, useContext, useState, useCallback, useEffect } from 'react';
+import { apiFetch, setToken, clearToken, getToken } from '@/api/client';
 
 const AuthContext = createContext(null);
 
 export function AuthProvider({ children }) {
   const [user, setUser] = useState(null);
 
-  // HU-01: Autenticación con email institucional y contraseña
-  const login = useCallback((email, password) => {
-    return new Promise((resolve, reject) => {
-      setTimeout(() => {
-        if (email.endsWith('@iecol.edu.co') && password === 'safeclass') {
-          const found = mockUsers.find((u) => u.email === email);
-          const role  = getRoleFromEmail(email);
-          const logged = found ?? {
-            id: 0, name: email.split('@')[0], email, role, active: true,
-          };
-          setUser(logged);
-          resolve(logged);
-        } else {
-          reject(new Error('Credenciales inválidas'));
-        }
-      }, 900);
-    });
+  // Restore session from a token already in localStorage on page load
+  useEffect(() => {
+    const token = getToken();
+    if (!token) return;
+    apiFetch('/api/auth/refresh', { method: 'POST', credentials: 'include' })
+      .then((data) => {
+        setToken(data.token);
+        setUser(data.user);
+      })
+      .catch(() => {
+        clearToken();
+      });
   }, []);
 
-  const logout = useCallback(() => setUser(null), []);
+  // HU-01: Autenticación con email institucional y contraseña
+  const login = useCallback(async (email, password) => {
+    const data = await apiFetch('/api/auth/login', {
+      method: 'POST',
+      body: JSON.stringify({ email, password }),
+    });
+    setToken(data.token);
+    setUser(data.user);
+    return data.user;
+  }, []);
+
+  const logout = useCallback(async () => {
+    try {
+      await apiFetch('/api/auth/logout', { method: 'POST', credentials: 'include' });
+    } finally {
+      clearToken();
+      setUser(null);
+    }
+  }, []);
 
   // HU-02: Solicitud de recuperación de contraseña
-  const requestPasswordReset = useCallback((email) => {
-    return new Promise((resolve, reject) => {
-      setTimeout(() => {
-        if (email.endsWith('@iecol.edu.co')) {
-          resolve({ email });
-        } else {
-          reject(new Error('El correo no pertenece al dominio institucional'));
-        }
-      }, 900);
+  const requestPasswordReset = useCallback(async (email) => {
+    return apiFetch('/api/auth/forgot-password', {
+      method: 'POST',
+      body: JSON.stringify({ email }),
     });
   }, []);
 

@@ -1,18 +1,34 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Icon from '@/components/ui/Icon';
 import { UserRow } from '@/components/admin';
-import { mockUsers } from '@/data/mockData';
+import { apiFetch } from '@/api/client';
 import { useToast } from '@/hooks/useToast';
 
 export default function UsersTab() {
   const { addToast }      = useToast();
-  const [users, setUsers] = useState(mockUsers);
+  const [users, setUsers] = useState([]);
+  const [loading, setLoading] = useState(true);
 
-  const handleToggle = (id) => {
-    const u = users.find((u) => u.id === id);
-    setUsers((prev) => prev.map((u) => u.id === id ? { ...u, active: !u.active } : u));
-    addToast(`Usuario ${u?.name} ${u?.active ? 'desactivado' : 'activado'}`, 'success');
+  useEffect(() => {
+    apiFetch('/api/users')
+      .then(setUsers)
+      .catch((err) => addToast(`Error al cargar usuarios: ${err.message}`, 'error'))
+      .finally(() => setLoading(false));
+  }, []);
+
+  const handleToggle = async (id) => {
+    try {
+      const updated = await apiFetch(`/api/users/${id}/toggle`, { method: 'PUT' });
+      setUsers((prev) => prev.map((u) => u.id === id ? { ...u, active: updated.active } : u));
+      addToast(`Usuario ${updated.name} ${updated.active ? 'activado' : 'desactivado'}`, 'success');
+    } catch (err) {
+      addToast(`Error: ${err.message}`, 'error');
+    }
   };
+
+  if (loading) {
+    return <div className="p-6 text-text-hint text-sm">Cargando usuarios…</div>;
+  }
 
   return (
     <div className="p-6">

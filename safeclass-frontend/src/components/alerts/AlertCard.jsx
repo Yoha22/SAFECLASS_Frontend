@@ -27,11 +27,11 @@ export default function AlertCard({ alert, onClick, onConfirm, onDiscard }) {
 
       <div className="flex items-center gap-2 text-xs text-text-secondary mb-2">
         <Icon name="camera" size={12} />
-        <span>{alert.cameraId}</span>
+        <span>{alert.camera?.name ?? alert.cameraId}</span>
         <span className="text-text-hint">·</span>
-        <span>Aula {alert.classroom}</span>
+        <span>{alert.classroom?.name ?? `Aula ${alert.classroom}`}</span>
         <span className="text-text-hint">·</span>
-        <span className="font-mono">{fmt.time(alert.timestamp)}</span>
+        <span className="font-mono">{fmt.time(alert.createdAt ?? alert.timestamp)}</span>
       </div>
 
       <ConfidenceBar value={alert.confidence} />

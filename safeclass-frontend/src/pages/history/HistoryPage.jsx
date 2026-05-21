@@ -17,7 +17,7 @@ export default function HistoryPage() {
   const filtered = useMemo(() => alerts.filter((a) => {
     const matchType   = filterType   === 'todos' || a.type   === filterType;
     const matchStatus = filterStatus === 'todos' || a.status === filterStatus;
-    const matchSearch = !search || a.id.includes(search.toUpperCase()) || a.classroom.includes(search.toUpperCase());
+    const matchSearch = !search || a.id.includes(search.toUpperCase()) || (a.classroom?.name ?? '').toUpperCase().includes(search.toUpperCase());
     return matchType && matchStatus && matchSearch;
   }), [alerts, filterType, filterStatus, search]);
 
@@ -47,7 +47,7 @@ export default function HistoryPage() {
 
         <select value={filterType} onChange={(e) => setFilterType(e.target.value)}
           className="px-3 py-1.5 bg-surface border border-[#1e2d4a] rounded-md text-sm text-text-primary focus:outline-none focus:border-blue-500">
-          {['todos', 'AGRESIÓN', 'AISLAMIENTO', 'CAÍDA', 'OTRO'].map((t) => (
+          {['todos', 'AGRESION', 'AISLAMIENTO', 'CAIDA', 'OTRO'].map((t) => (
             <option key={t} value={t}>{t === 'todos' ? 'Todos los tipos' : t}</option>
           ))}
         </select>
@@ -76,8 +76,8 @@ export default function HistoryPage() {
                 className="border-b border-[#1e2d4a] hover:bg-white/5 cursor-pointer transition-colors">
                 <td className="px-4 py-2.5 font-mono text-text-secondary text-xs">{a.id}</td>
                 <td className="px-4 py-2.5"><AlertTypeBadge type={a.type} /></td>
-                <td className="px-4 py-2.5 text-text-secondary">Aula {a.classroom}</td>
-                <td className="px-4 py-2.5 font-mono text-text-secondary text-xs">{fmt.datetime(a.timestamp)}</td>
+                <td className="px-4 py-2.5 text-text-secondary">{a.classroom?.name ?? `Aula ${a.classroom}`}</td>
+                <td className="px-4 py-2.5 font-mono text-text-secondary text-xs">{fmt.datetime(a.createdAt ?? a.timestamp)}</td>
                 <td className="px-4 py-2.5"><ConfidenceBar value={a.confidence} /></td>
                 <td className="px-4 py-2.5"><StatusBadge status={a.status} /></td>
                 <td className="px-4 py-2.5">

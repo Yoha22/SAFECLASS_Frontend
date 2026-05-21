@@ -1,11 +1,10 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { KPICard, ClassroomTabs } from '@/components/dashboard';
 import AlertCard   from '@/components/alerts/AlertCard';
 import AlertDetail from '@/components/alerts/AlertDetail';
 import Icon        from '@/components/ui/Icon';
 import { useAlerts } from '@/hooks/useAlerts';
 import { ALERT_STATUS, DISCARD_REASONS } from '@/constants/alertConfig';
-import { mockSystemStats } from '@/data/mockData';
 
 export default function DashboardPage() {
   const {
@@ -17,7 +16,23 @@ export default function DashboardPage() {
   const [selectedAlert, setSelectedAlert] = useState(null);
 
   const pendingAlerts = alerts.filter((a) => a.status === ALERT_STATUS.PENDIENTE);
-  const todayStats    = mockSystemStats.today;
+
+  // Compute today's KPIs from real alert data
+  const todayStats = useMemo(() => {
+    const todayStart = new Date();
+    todayStart.setHours(0, 0, 0, 0);
+    const todayAlerts = alerts.filter(
+      (a) => new Date(a.createdAt ?? a.timestamp) >= todayStart
+    );
+    const confirmed      = todayAlerts.filter((a) => a.status === ALERT_STATUS.CONFIRMADA).length;
+    const falsePositives = todayAlerts.filter((a) => a.status === ALERT_STATUS.DESCARTADA).length;
+    return {
+      total:          todayAlerts.length,
+      confirmed,
+      falsePositives,
+      avgResponseMin: '—',
+    };
+  }, [alerts]);
 
   const handleConfirm  = (id) => { confirmAlert(id);                     setSelectedAlert(null); };
   const handleDiscard  = (id, reason) => { discardAlert(id, reason);     setSelectedAlert(null); };

@@ -1,23 +1,51 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Icon from '@/components/ui/Icon';
 import { CameraRow } from '@/components/admin';
-import { mockCameras } from '@/data/mockData';
+import { apiFetch } from '@/api/client';
 import { useToast } from '@/hooks/useToast';
+
+function adaptCamera(c) {
+  return {
+    ...c,
+    rtsp:       c.rtspUrl ?? '',
+    fps:        c.fps     ?? 0,
+    resolution: c.resolution ?? '—',
+    lastCheck:  c.lastCheck ?? null,
+  };
+}
 
 export default function CamerasTab() {
   const { addToast }          = useToast();
-  const [cameras, setCameras] = useState(mockCameras);
+  const [cameras, setCameras] = useState([]);
   const [testing, setTesting] = useState(null);
+  const [loading, setLoading] = useState(true);
 
-  const handleTest = (id) => {
+  useEffect(() => {
+    apiFetch('/api/cameras')
+      .then((data) => setCameras(data.map(adaptCamera)))
+      .catch((err) => addToast(`Error al cargar cámaras: ${err.message}`, 'error'))
+      .finally(() => setLoading(false));
+  }, []);
+
+  const handleTest = async (id) => {
     setTesting(id);
-    setTimeout(() => {
-      const ok = Math.random() > 0.35;
+    try {
+      const result = await apiFetch(`/api/cameras/${id}/test`, { method: 'POST' });
+      setCameras((prev) => prev.map((c) => c.id === id ? { ...c, status: result.status, lastCheck: result.lastCheck } : c));
+      addToast(
+        result.status === 'online' ? `Conexión exitosa con ${id}` : `Error: timeout en ${id}`,
+        result.status === 'online' ? 'success' : 'error',
+      );
+    } catch (err) {
+      addToast(`Error al testear ${id}: ${err.message}`, 'error');
+    } finally {
       setTesting(null);
-      setCameras((prev) => prev.map((c) => c.id === id ? { ...c, status: ok ? 'online' : 'error' } : c));
-      addToast(ok ? `Conexión exitosa con ${id}` : `Error: timeout en ${id}`, ok ? 'success' : 'error');
-    }, 1800);
+    }
   };
+
+  if (loading) {
+    return <div className="p-6 text-text-hint text-sm">Cargando cámaras…</div>;
+  }
 
   return (
     <div className="p-6">

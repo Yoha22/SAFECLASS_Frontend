@@ -28,7 +28,7 @@ export default function RightPanel({ alerts = [], onAlertClick }) {
               <StatusBadge status={a.status} />
             </div>
             <div className="text-xs text-text-secondary">
-              Aula {a.classroom} · {fmt.time(a.timestamp)}
+              {a.classroom?.name ?? `Aula ${a.classroom}`} · {fmt.time(a.createdAt ?? a.timestamp)}
             </div>
           </button>
         ))}

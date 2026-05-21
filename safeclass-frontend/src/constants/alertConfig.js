@@ -1,13 +1,14 @@
 // HU-03 / HU-05: tipos de incidencia detectados por el módulo IA
+// Keys match the backend AlertType enum exactly (no accents).
 export const ALERT_TYPES = {
-  AGRESION:    'AGRESIÓN',
+  AGRESION:    'AGRESION',
   AISLAMIENTO: 'AISLAMIENTO',
-  CAIDA:       'CAÍDA',
+  CAIDA:       'CAIDA',
   OTRO:        'OTRO',
 };
 
 export const ALERT_CONFIG = {
-  AGRESIÓN: {
+  AGRESION: {
     icon:  'fist',
     color: '#ef4444',
     bg:    'rgba(239,68,68,0.12)',
@@ -19,7 +20,7 @@ export const ALERT_CONFIG = {
     bg:    'rgba(245,158,11,0.12)',
     label: 'Aislamiento',
   },
-  CAÍDA: {
+  CAIDA: {
     icon:  'personFall',
     color: '#3b82f6',
     bg:    'rgba(59,130,246,0.12)',
