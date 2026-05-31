@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Icon from '@/components/ui/Icon';
 import { ThresholdSlider } from '@/components/admin';
 import { apiFetch } from '@/api/client';
@@ -13,6 +13,14 @@ export default function AIConfigTab() {
   const [thresholdHistory, setThresholdHistory] = useState([]);
   const [confirmOpen,      setConfirmOpen]       = useState(false);
   const [saving,           setSaving]            = useState(false);
+  const [loadingThreshold, setLoadingThreshold]  = useState(true);
+
+  useEffect(() => {
+    apiFetch('/api/stats/threshold')
+      .then((data) => setThreshold(data.threshold))
+      .catch(() => {})
+      .finally(() => setLoadingThreshold(false));
+  }, []);
 
   const apply = async () => {
     setSaving(true);
@@ -41,11 +49,15 @@ export default function AIConfigTab() {
         Las alertas con confianza inferior al umbral no se notifican al docente. Rango recomendado: 0.65 – 0.90.
       </p>
 
-      <ThresholdSlider value={threshold} onChange={setThreshold} />
+      {loadingThreshold
+        ? <div className="text-xs text-text-hint py-4">Cargando umbral actual…</div>
+        : <ThresholdSlider value={threshold} onChange={setThreshold} />
+      }
 
       <button
         onClick={() => setConfirmOpen(true)}
-        className="mt-4 flex items-center gap-2 px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white text-sm font-semibold rounded-md transition-colors"
+        disabled={loadingThreshold}
+        className="mt-4 flex items-center gap-2 px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white text-sm font-semibold rounded-md transition-colors disabled:opacity-50"
       >
         <Icon name="check" size={14} /> Aplicar umbral
       </button>

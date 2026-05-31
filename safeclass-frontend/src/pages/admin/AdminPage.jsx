@@ -1,14 +1,16 @@
 import { useState } from 'react';
-import UsersTab    from './tabs/UsersTab';
-import CamerasTab  from './tabs/CamerasTab';
-import AIConfigTab from './tabs/AIConfigTab';
-import SystemTab   from './tabs/SystemTab';
+import UsersTab      from './tabs/UsersTab';
+import CamerasTab    from './tabs/CamerasTab';
+import AIConfigTab   from './tabs/AIConfigTab';
+import SystemTab     from './tabs/SystemTab';
+import VideoTestTab  from './tabs/VideoTestTab';
 
 const TABS = [
-  { id: 'usuarios', label: 'Usuarios'         },
-  { id: 'camaras',  label: 'Cámaras'          },
-  { id: 'ia',       label: 'Configuración IA'  },
-  { id: 'sistema',  label: 'Sistema'           },
+  { id: 'usuarios',   label: 'Usuarios'         },
+  { id: 'camaras',    label: 'Cámaras'          },
+  { id: 'ia',         label: 'Configuración IA'  },
+  { id: 'video',      label: 'Prueba de Video'   },
+  { id: 'sistema',    label: 'Sistema'           },
 ];
 
 export default function AdminPage() {
@@ -46,6 +48,7 @@ export default function AdminPage() {
         {tab === 'usuarios' && <UsersTab />}
         {tab === 'camaras'  && <CamerasTab />}
         {tab === 'ia'       && <AIConfigTab />}
+        {tab === 'video'    && <VideoTestTab />}
         {tab === 'sistema'  && <SystemTab />}
       </div>
     </div>

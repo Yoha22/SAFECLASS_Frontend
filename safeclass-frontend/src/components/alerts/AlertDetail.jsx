@@ -40,7 +40,7 @@ export default function AlertDetail({ alert, onClose, onConfirm, onDiscard, onEs
       {/* Body */}
       <div className="px-5 py-4 flex flex-col gap-4">
         <VideoPlaceholder
-          classroom={alert.classroom}
+          classroom={alert.classroom?.name ?? alert.classroom ?? ''}
           hasAlert={isPending}
         />
 
